@@ -1,0 +1,60 @@
+name: Test & deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Unit tests
+        run: node --test
+      - name: Check vendored runtime and model are present
+        run: |
+          for f in index.html \
+                   vendor/mediapipe/tasks-vision/vision_bundle.mjs \
+                   vendor/mediapipe/tasks-vision/wasm/vision_wasm_internal.js \
+                   vendor/mediapipe/tasks-vision/wasm/vision_wasm_internal.wasm; do
+            test -s "$f" || { echo "::error::Missing $f"; exit 1; }
+          done
+          if [ ! -s models/hand_landmarker.task ]; then
+            echo "::warning::models/hand_landmarker.task is missing — gesture detection will be disabled (manual capture still works)."
+          fi
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp index.html sw.js _site/
+          cp -r src assets vendor models _site/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
