@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!--
+    Strict CSP: the page may only talk to its own origin. This guarantees no
+    analytics, no CDN and no uploads — even third-party code (e.g. MediaPipe's
+    built-in usage logging) cannot reach the network.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; connect-src 'self' data: blob:; worker-src 'self' blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#0b0d12">
+  <title>GDG Gesture Photo Booth</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="src/styles.css">
+  <script type="module" src="src/main.js"></script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zM9 2 7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></symbol>
+    <symbol id="i-gallery" viewBox="0 0 24 24"><path d="M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4 2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z"/></symbol>
+    <symbol id="i-tune" viewBox="0 0 24 24"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></symbol>
+    <symbol id="i-fullscreen" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></symbol>
+    <symbol id="i-delete" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24"><path d="M13 24c-3.26 0-6.19-1.99-7.4-5.02l-3.03-7.61a1 1 0 0 1 1.26-1.3l.79.26c.56.18 1.02.61 1.24 1.16L7.25 15H8V3.25a1.25 1.25 0 0 1 2.5 0V12h1V1.25a1.25 1.25 0 0 1 2.5 0V12h1V2.75a1.25 1.25 0 0 1 2.5 0V12h1V5.75a1.25 1.25 0 0 1 2.5 0V16c0 4.42-3.58 8-8 8z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></symbol>
+    <symbol id="i-timer" viewBox="0 0 24 24"><path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61 1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42A8.962 8.962 0 0 0 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></symbol>
+  </svg>
+
+  <main id="app" class="app is-mirrored" data-phase="loading">
+    <!-- Camera stage: what you see here is exactly what gets captured. -->
+    <div class="stage" id="stage">
+      <video id="video" class="stage__video" autoplay muted playsinline></video>
+      <img id="frame" class="stage__frame" alt="" hidden>
+      <canvas id="debug" class="stage__debug" hidden></canvas>
+      <div id="flash" class="flash"></div>
+    </div>
+
+    <!-- Detection indicator -->
+    <div class="status" id="status" data-state="loading">
+      <div class="status__ring">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+          <circle class="ring__track" cx="24" cy="24" r="21"/>
+          <circle class="ring__progress" id="ringProgress" cx="24" cy="24" r="21" pathLength="100"/>
+        </svg>
+        <svg class="status__icon" id="statusIcon" aria-hidden="true"><use href="#i-hand"/></svg>
+      </div>
+      <div class="status__text" role="status" aria-live="polite">
+        <strong id="statusTitle">جاري التحميل…</strong>
+        <span id="statusSub">Loading</span>
+      </div>
+      <div class="status__chips" dir="ltr" aria-hidden="true">
+        <span class="chip" id="chipLeft">&lt;</span>
+        <span class="chip" id="chipRight">&gt;</span>
+      </div>
+    </div>
+
+    <!-- Persistent warning (e.g. model missing) -->
+    <div class="banner" id="banner" hidden role="alert">
+      <svg aria-hidden="true"><use href="#i-warn"/></svg>
+      <span id="bannerText"></span>
+    </div>
+
+    <!-- How-to hint -->
+    <div class="hint" id="hint">
+      <span class="hint__glyph" dir="ltr" aria-hidden="true"><b class="g-red">&lt;</b><b class="g-green">&gt;</b></span>
+      <span>اصنع شعار <bdi dir="ltr">GDG</bdi> بيديك: علامة <bdi dir="ltr">V</bdi> جانبية بكل يد، وثبّتها لحظة</span>
+    </div>
+
+    <!-- Countdown -->
+    <div class="countdown" id="countdown" aria-live="assertive"></div>
+
+    <!-- Preview of the captured photo -->
+    <div class="preview" id="preview" hidden>
+      <figure class="preview__card">
+        <img id="previewImg" alt="الصورة الملتقطة">
+        <div class="preview__timer"><span id="previewTimer"></span></div>
+        <figcaption class="preview__actions">
+          <button class="btn btn--primary" id="btnDownload" type="button">
+            <svg aria-hidden="true"><use href="#i-download"/></svg> تحميل الصورة
+          </button>
+          <button class="btn" id="btnClosePreview" type="button">
+            <svg aria-hidden="true"><use href="#i-camera"/></svg> صورة جديدة
+          </button>
+        </figcaption>
+      </figure>
+    </div>
+
+    <!-- Toolbar -->
+    <nav class="toolbar" id="toolbar" aria-label="أدوات">
+      <button class="tool tool--shutter" id="btnCapture" type="button" title="التقاط (Space)" aria-label="التقاط صورة">
+        <svg aria-hidden="true"><use href="#i-camera"/></svg>
+      </button>
+      <button class="tool" id="btnGallery" type="button" title="معرض الصور (G)" aria-label="معرض الصور">
+        <svg aria-hidden="true"><use href="#i-gallery"/></svg>
+        <span class="tool__badge" id="galleryCount" hidden>0</span>
+      </button>
+      <button class="tool" id="btnSettings" type="button" title="الإعدادات (S)" aria-label="الإعدادات">
+        <svg aria-hidden="true"><use href="#i-tune"/></svg>
+      </button>
+      <button class="tool" id="btnFullscreen" type="button" title="ملء الشاشة (F)" aria-label="ملء الشاشة">
+        <svg aria-hidden="true"><use href="#i-fullscreen"/></svg>
+      </button>
+      <button class="tool" id="btnHelp" type="button" title="المساعدة (H)" aria-label="المساعدة">
+        <svg aria-hidden="true"><use href="#i-help"/></svg>
+      </button>
+    </nav>
+
+    <!-- Gallery drawer -->
+    <aside class="drawer" id="gallery" hidden aria-label="معرض الصور">
+      <header class="drawer__head">
+        <h2>صور الجلسة <span class="muted" id="galleryTitleCount"></span></h2>
+        <div class="drawer__actions">
+          <button class="btn btn--primary btn--sm" id="btnDownloadAll" type="button">
+            <svg aria-hidden="true"><use href="#i-download"/></svg> <span>تحميل الكل · <bdi dir="ltr">ZIP</bdi></span>
+          </button>
+          <button class="btn btn--sm" id="btnClearGallery" type="button">
+            <svg aria-hidden="true"><use href="#i-delete"/></svg> مسح
+          </button>
+          <button class="icon-btn" id="btnCloseGallery" type="button" aria-label="إغلاق">
+            <svg aria-hidden="true"><use href="#i-close"/></svg>
+          </button>
+        </div>
+      </header>
+      <p class="drawer__note">الصور محفوظة في ذاكرة المتصفح فقط ولا تُرفع إلى أي مكان. حمّلها قبل إغلاق الصفحة.</p>
+      <div class="gallery-grid" id="galleryGrid"></div>
+      <p class="empty" id="galleryEmpty">لا توجد صور بعد — اصنع الإشارة أو اضغط <kbd>Space</kbd>.</p>
+    </aside>
+
+    <!-- Settings panel (key S) -->
+    <aside class="panel" id="settings" hidden aria-label="الإعدادات">
+      <header class="panel__head">
+        <h2>الإعدادات <span class="muted">Settings</span></h2>
+        <button class="icon-btn" id="btnCloseSettings" type="button" aria-label="إغلاق">
+          <svg aria-hidden="true"><use href="#i-close"/></svg>
+        </button>
+      </header>
+      <form class="panel__body" id="settingsForm" autocomplete="off">
+        <fieldset>
+          <legend>الإيماءة <span class="muted">Gesture</span></legend>
+          <label class="field">
+            <span>مدة التثبيت <span class="muted">Hold time</span></span>
+            <input type="range" name="holdMs" min="300" max="2500" step="100">
+            <output data-for="holdMs" data-unit="ms"></output>
+          </label>
+          <label class="field">
+            <span>فترة التهدئة <span class="muted">Cooldown</span></span>
+            <input type="range" name="cooldownMs" min="1000" max="15000" step="500">
+            <output data-for="cooldownMs" data-unit="ms"></output>
+          </label>
+          <label class="field">
+            <span>دقة الكشف <span class="muted">Detection confidence</span></span>
+            <input type="range" name="confidence" min="0.3" max="0.9" step="0.05">
+            <output data-for="confidence"></output>
+          </label>
+          <label class="field">
+            <span>أقصى ميل للعلامة <span class="muted">Max tilt</span></span>
+            <input type="range" name="maxTiltDeg" min="20" max="60" step="5">
+            <output data-for="maxTiltDeg" data-unit="°"></output>
+          </label>
+        </fieldset>
+        <fieldset>
+          <legend>الالتقاط <span class="muted">Capture</span></legend>
+          <label class="field">
+            <span>العد التنازلي <span class="muted">Countdown</span></span>
+            <input type="range" name="countdownSeconds" min="1" max="10" step="1">
+            <output data-for="countdownSeconds" data-unit="s"></output>
+          </label>
+          <label class="field">
+            <span>مدة المعاينة <span class="muted">Preview</span></span>
+            <input type="range" name="previewMs" min="2000" max="15000" step="500">
+            <output data-for="previewMs" data-unit="ms"></output>
+          </label>
+          <label class="switch"><input type="checkbox" name="autoDownload"><span>حفظ كل صورة تلقائيًا <span class="muted">Auto-download</span></span></label>
+          <label class="switch"><input type="checkbox" name="sound"><span>الأصوات <span class="muted">Sound</span></span></label>
+        </fieldset>
+        <fieldset>
+          <legend>الكاميرا <span class="muted">Camera</span></legend>
+          <label class="field field--select">
+            <span>اختيار الكاميرا <span class="muted">Device</span></span>
+            <select name="cameraId" id="cameraSelect"></select>
+          </label>
+          <label class="switch"><input type="checkbox" name="mirror"><span>عرض مرآة <span class="muted">Mirror</span></span></label>
+          <p class="hint-text">المرآة تجعل الحركة طبيعية (مثل المرآة) والصورة تُحفظ كما تظهر على الشاشة. الإطار والنصوص لا تنقلب أبدًا.</p>
+        </fieldset>
+        <div class="panel__foot">
+          <button class="btn btn--sm" type="button" id="btnResetSettings">استعادة الافتراضي</button>
+          <span class="muted" id="engineInfo"></span>
+        </div>
+      </form>
+    </aside>
+
+    <!-- Help -->
+    <div class="modal" id="help" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <div class="modal__card">
+        <header class="panel__head">
+          <h2 id="helpTitle">طريقة الاستخدام</h2>
+          <button class="icon-btn" id="btnCloseHelp" type="button" aria-label="إغلاق">
+            <svg aria-hidden="true"><use href="#i-close"/></svg>
+          </button>
+        </header>
+        <ol class="steps">
+          <li>قف أمام الكاميرا بحيث تظهر يداك بوضوح.</li>
+          <li>اصنع علامة <bdi dir="ltr">V</bdi> (السبابة + الوسطى) بشكل <b>أفقي</b> بكل يد، مع ثني البنصر والخنصر.</li>
+          <li>اليد اليسرى على الشاشة تشير لليمين <bdi dir="ltr" class="g-red">&lt;</bdi> واليد اليمنى تشير لليسار <bdi dir="ltr" class="g-green">&gt;</bdi> — مثل شعار <bdi dir="ltr">GDG</bdi>.</li>
+          <li>ثبّت الإشارة حتى تمتلئ الدائرة، ثم ابتسم للعد التنازلي <bdi dir="ltr">3-2-1</bdi>.</li>
+        </ol>
+        <table class="keys">
+          <tr><td><kbd>Space</kbd></td><td>التقاط يدوي (بديل الإيماءة)</td></tr>
+          <tr><td><kbd>D</kbd></td><td>إظهار/إخفاء نقاط اليد <span class="muted">Debug landmarks</span></td></tr>
+          <tr><td><kbd>F</kbd></td><td>ملء الشاشة <span class="muted">Fullscreen</span></td></tr>
+          <tr><td><kbd>S</kbd></td><td>الإعدادات <span class="muted">Settings</span></td></tr>
+          <tr><td><kbd>G</kbd></td><td>معرض الصور <span class="muted">Gallery</span></td></tr>
+          <tr><td><kbd>H</kbd></td><td>هذه المساعدة <span class="muted">Help</span></td></tr>
+          <tr><td><kbd>Esc</kbd></td><td>إغلاق / إلغاء العد التنازلي</td></tr>
+        </table>
+        <p class="hint-text">يعمل التطبيق بالكامل بدون إنترنت. لا تُرفع الصور ولا توجد أي تحليلات.</p>
+      </div>
+    </div>
+
+    <!-- Loading / error overlay -->
+    <div class="overlay" id="overlay">
+      <div class="overlay__card">
+        <div class="spinner" id="overlaySpinner" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <svg class="overlay__icon" id="overlayIcon" hidden aria-hidden="true"><use href="#i-warn"/></svg>
+        <h1 id="overlayTitle">جاري تشغيل الكاميرا…</h1>
+        <p id="overlayMsg">اسمح للمتصفح باستخدام الكاميرا عند الطلب.</p>
+        <p class="muted" id="overlayDetail" dir="ltr"></p>
+        <div class="overlay__actions" id="overlayActions"></div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </main>
+
+  <noscript>
+    <div class="noscript">هذا التطبيق يحتاج JavaScript. — This app requires JavaScript.</div>
+  </noscript>
+</body>
+</html>
